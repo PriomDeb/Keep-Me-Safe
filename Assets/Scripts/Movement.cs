@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,7 +27,20 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        ProcessInput();
+
+        try
+        {
+            if (Mouse.current.IsPressed(1f))
+            {
+                MouseControlledMovement();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            Debug.Log("Error Passed");
+        }
+
+        /*ProcessInput();*/
 
         KeepPlayerOnScreen();
 
@@ -48,6 +62,7 @@ public class Movement : MonoBehaviour
     {
         if (Touchscreen.current.primaryTouch.press.isPressed)
         {
+
             animator.SetBool(isRunning, true);
 
             Vector2 touchPosition = Touchscreen.current.primaryTouch.position.ReadValue();
@@ -58,7 +73,8 @@ public class Movement : MonoBehaviour
             movementDirection = transform.position - worldPosition;
             movementDirection.z = 0;
             movementDirection.Normalize();
-        } else
+        }
+        else
         {
             movementDirection = Vector3.zero;
         }
@@ -102,6 +118,20 @@ public class Movement : MonoBehaviour
         }
 
         transform.position = newPosition;
+    }
+
+
+    private void MouseControlledMovement()
+    {
+        animator.SetBool(isRunning, true);
+
+        Vector3 mousePos = Mouse.current.position.ReadValue();
+        mousePos.z = Camera.main.farClipPlane * 0.5f;
+        Vector3 worldPoint = Camera.main.ScreenToWorldPoint(mousePos);
+
+        movementDirection = transform.position - worldPoint;
+        movementDirection.z = 0;
+        movementDirection.Normalize();
     }
 
 
